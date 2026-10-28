@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>推薦書 下書きメーカー</title>
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --ink:#1f1f1c; --sub:#5c5b55; --line:#dcd9d0;
+  --accent:#2f5d50; --accent-ink:#ffffff; --soft:#e8efe9; --warn:#8a4b12; --warn-bg:#fbf1e4;
+  --field:#fbfaf7;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#171816; --card:#21231f; --ink:#ecebe6; --sub:#a9a79f; --line:#3a3c36;
+    --accent:#7fb8a4; --accent-ink:#10201a; --soft:#263129; --warn:#f0b878; --warn-bg:#33281c;
+    --field:#1b1d1a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171816; --card:#21231f; --ink:#ecebe6; --sub:#a9a79f; --line:#3a3c36;
+  --accent:#7fb8a4; --accent-ink:#10201a; --soft:#263129; --warn:#f0b878; --warn-bg:#33281c;
+  --field:#1b1d1a;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+  font-size:16px;line-height:1.75}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px 80px}
+header h1{font-size:1.55rem;margin:0 0 4px;letter-spacing:.02em}
+header p{margin:0;color:var(--sub)}
+.note{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:12px 14px;margin:16px 0 8px;font-size:.95rem}
+.note b{color:inherit}
+.how{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;padding:0;list-style:none;counter-reset:s}
+.how li{flex:1 1 170px;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:.95rem;counter-increment:s}
+.how li::before{content:counter(s);display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;
+  background:var(--accent);color:var(--accent-ink);font-weight:700;margin-right:6px;font-size:.85rem}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-top:18px}
+section.card>h2{font-size:1.15rem;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+.num{display:inline-grid;place-items:center;width:1.7em;height:1.7em;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-size:.9rem}
+.lead{color:var(--sub);margin:0 0 12px;font-size:.95rem}
+label.f{display:block;font-weight:700;margin:14px 0 4px}
+label.f small{font-weight:400;color:var(--sub);margin-left:6px;font-size:.88rem}
+.req{color:var(--warn);font-size:.875rem;margin-left:6px;font-weight:700}
+input[type=text],input[type=number],textarea{width:100%;font:inherit;color:var(--ink);background:var(--field);
+  border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:44px}
+textarea{min-height:110px;resize:vertical;line-height:1.6}
+textarea.big{min-height:220px}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.row2{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+button{font:inherit;cursor:pointer;border-radius:10px;min-height:44px;padding:8px 14px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink)}
+button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700;padding:10px 20px}
+button.ghost{background:transparent}
+.ran{display:grid;grid-template-columns:1fr 110px 44px;gap:8px;align-items:center;margin-bottom:8px}
+.ran input[type=number]{text-align:right}
+.ran .x{padding:0;width:44px}
+@media (max-width:420px){.ran{grid-template-columns:1fr 84px 44px}}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.tabs button{flex:1 1 200px;text-align:left;line-height:1.45;padding:10px 12px}
+.tabs button span{display:block;font-size:.88rem;opacity:.85;font-weight:400}
+.tabs button b{display:block}
+.extra{display:none}
+.extra.show{display:block}
+.out{white-space:pre-wrap;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:14px;
+  font-size:.95rem;line-height:1.7;max-height:420px;overflow:auto;margin-top:10px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.count{color:var(--sub);font-size:.92rem}
+.toast{color:var(--accent);font-weight:700;font-size:.95rem}
+details{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.qa{display:grid;gap:10px;margin-top:6px}
+.qa div{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:.95rem}
+.qa b{display:block}
+.warnline{color:var(--warn);font-size:.92rem;margin-top:8px;min-height:1em}
+footer{color:var(--sub);font-size:.88rem;margin-top:28px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>推薦書 下書きメーカー</h1>
+  <p>インタビューの書き起こしと資料を入れると、AIに渡す「指示文」を組み立てます。</p>
+</header>
+
+<div class="note"><b>入力した内容は、この画面の中だけにあります。</b>どこにも保存・送信されず、画面を閉じると消えます。
+生徒の情報をAIに入れてよいかは、学校の決まりに従ってください。できるのは下書きまでです。事実の確認と仕上げは担当の先生が行います。</div>
+
+<ol class="how">
+  <li>様式と材料を入れる</li>
+  <li>作る指示文を選ぶ</li>
+  <li>コピーして、AIに貼る</li>
+  <li>返ってきた文を確かめ、仕上げる</li>
+</ol>
+
+<section class="card">
+  <h2><span class="num">1</span>大学と様式</h2>
+  <p class="lead">推薦書の欄と字数を合わせます。様式を見て、欄の名前と字数を直してください。</p>
+  <div class="row2">
+    <div><label class="f" for="univ">大学名</label><input type="text" id="univ" placeholder="例：〇〇大学"></div>
+    <div><label class="f" for="dept">学部・学科（コース）</label><input type="text" id="dept" placeholder="例：文教育学部 人文科学科（地理学コース）"></div>
+  </div>
+  <label class="f">欄と字数</label>
+  <div class="chips" id="presets">
+    <button type="button" data-p="two">2欄（推薦の理由／人物・性格）</button>
+    <button type="button" data-p="one">1欄・短い（約300字）</button>
+  </div>
+  <div id="rans"></div>
+  <button type="button" class="ghost" id="addRan">＋ 欄を足す</button>
+</section>
+
+<section class="card">
+  <h2><span class="num">2</span>材料</h2>
+  <p class="lead">わかる分だけで大丈夫です。足りないところは、AIが空欄【①】にして「追加で聞くこと」を出します。</p>
+
+  <label class="f" for="talk">インタビューの書き起こし<span class="req">必須</span></label>
+  <textarea id="talk" class="big" placeholder="録音を文字にしたものを、そのまま貼り付けてください。聞き手・本人の区別がなくてもかまいません。"></textarea>
+  <details>
+    <summary>インタビューで聞くこと（A〜H）を見る</summary>
+    <div class="qa" id="qa"></div>
+  </details>
+
+  <label class="f" for="ap">アドミッション・ポリシー（求める学生像）<small>募集要項から貼り付け</small></label>
+  <textarea id="ap" placeholder="大学・学部・学科の「求める学生像」や推薦要件の部分"></textarea>
+
+  <label class="f" for="grade">評定・資格など<small>調査書から</small></label>
+  <textarea id="grade" placeholder="例：評定平均値4.6／英語4.9、地理歴史5.0／実用英語技能検定2級（2年次）／校内選抜のプログラム名"></textarea>
+
+  <label class="f" for="shibo">志望理由書<small>あれば</small></label>
+  <textarea id="shibo" placeholder="添削後のものを貼り付け"></textarea>
+
+  <label class="f" for="ronbun">卒業論文・探究の要旨<small>あれば</small></label>
+  <textarea id="ronbun" placeholder="題、問題意識、調べ方（対象・人数）、参考にした資料、結論"></textarea>
+
+  <label class="f" for="obs">担任・顧問から見た様子<small>あれば</small></label>
+  <textarea id="obs" placeholder="学級でのふるまい、部活動の役職・大会の結果など、先生が知っていること"></textarea>
+
+  <label class="f" for="ng">書いてほしくないこと</label>
+  <textarea id="ng" style="min-height:70px" placeholder="例：家庭の事情には触れない／〇〇の件は書かない"></textarea>
+</section>
+
+<section class="card">
+  <h2><span class="num">3</span>作る指示文を選ぶ</h2>
+  <p class="lead">ふつうは ア → イ → ウ の順に使います。イだけでも下書きはできます。</p>
+  <div class="tabs" id="kinds">
+    <button type="button" data-k="seiri" class="on"><b>ア　材料の整理</b><span>集まった事実と、追加で聞くことの一覧</span></button>
+    <button type="button" data-k="shitagaki"><b>イ　下書きと確認シート</b><span>推薦書の下書き＋生徒に渡す空欄の説明</span></button>
+    <button type="button" data-k="shiage"><b>ウ　仕上げ</b><span>生徒の答えを入れて、字数を整える</span></button>
+  </div>
+  <div class="extra" id="extraShiage">
+    <label class="f" for="prev">前に作った下書き<span class="req">ウで必須</span></label>
+    <textarea id="prev" placeholder="イで返ってきた下書きを貼り付け（先生が直したものでよい）"></textarea>
+    <label class="f" for="ans">確認シートへの生徒の答え・追加で聞いたこと<span class="req">ウで必須</span></label>
+    <textarea id="ans" placeholder="【①】2泊3日、2年の8月　のように、番号ごとに"></textarea>
+  </div>
+</section>
+
+<section class="card">
+  <h2><span class="num">4</span>指示文をコピーする</h2>
+  <p class="lead">学校で使ってよいAIのチャット欄に、そのまま貼り付けてください。</p>
+  <div class="bar">
+    <button type="button" class="primary" id="copy">指示文をコピー</button>
+    <span class="count" id="count"></span>
+    <span class="toast" id="toast" aria-live="polite"></span>
+  </div>
+  <div class="warnline" id="warn"></div>
+  <details>
+    <summary>指示文の中身を見る</summary>
+    <div class="out" id="out"></div>
+  </details>
+</section>
+
+<footer>入力はこの画面の外に出ません。</footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const PRESETS = {
+  two: [
+    {name: "推薦の理由", chars: 1000},
+    {name: "人物・性格の特徴", chars: 1000}
+  ],
+  one: [{name: "推薦理由", chars: 300}]
+};
+let kind = "seiri";
+
+const QA = [
+  ["A　将来と問い", "大学を出たあと、どんなことをしていたい？ → どんな仕事・立場？ いま持っている問いは？"],
+  ["B　きっかけの体験", "そう思うようになったきっかけは？ → いつ・どこで・誰と・何回？ 何を見て、自分は何をした？ 前とあとで考えはどう変わった？"],
+  ["C　問いを深めるためにしたこと", "授業以外で自分でしたことは？ → 読んだ本・観た作品の名前といくつくらいか。調べてわかったこと、意外だったこと。"],
+  ["D　学業", "力を入れてきた教科と勉強のしかたは？ → 授業で印象に残った学習と、そこから広げたこと。苦手な教科の工夫。発表したテーマ。"],
+  ["E　部活動・委員会・ボランティア", "どんなことをしてきた？ → 役職・いつから・部員は何人？ 自分から始めた工夫、困ったこと、その結果の変化。"],
+  ["F　総合的な探究・卒業論文", "何を、なぜ調べた？ → 調べ方・回数・人数、協力してくれた人、成果物・賞、結論をひとことで。"],
+  ["G　人柄・続けてきたこと", "クラスで意見が分かれたらどうする？ → 最近の具体的な場面。いちばん長く続けたこと、やめたくなった時の乗り越え方。"],
+  ["H　大学での学び・確認", "大学でいちばん受けたい授業は？ → コース・授業の名前、他学科で学びたいこと。推薦書に書いてほしくないこと。"]
+];
+$("#qa").innerHTML = QA.map(([t, d]) => `<div><b>${t}</b>${d}</div>`).join("");
+
+function addRan(name = "", chars = "") {
+  const d = document.createElement("div");
+  d.className = "ran";
+  d.innerHTML = `<input type="text" aria-label="欄の名前" placeholder="欄の名前" value="">
+    <input type="number" aria-label="字数" placeholder="字数" min="50" step="50" value="">
+    <button type="button" class="x" aria-label="この欄を消す">×</button>`;
+  d.querySelector("input[type=text]").value = name;
+  d.querySelector("input[type=number]").value = chars;
+  d.querySelector(".x").onclick = () => { d.remove(); render(); };
+  $("#rans").appendChild(d);
+}
+function setPreset(p) {
+  $("#rans").innerHTML = "";
+  PRESETS[p].forEach(r => addRan(r.name, r.chars));
+  document.querySelectorAll("#presets button").forEach(b => b.classList.toggle("on", b.dataset.p === p));
+  render();
+}
+document.querySelectorAll("#presets button").forEach(b => b.onclick = () => setPreset(b.dataset.p));
+$("#addRan").onclick = () => { addRan(); render(); };
+document.querySelectorAll("#kinds button").forEach(b => b.onclick = () => {
+  kind = b.dataset.k;
+  document.querySelectorAll("#kinds button").forEach(x => x.classList.toggle("on", x === b));
+  $("#extraShiage").classList.toggle("show", kind === "shiage");
+  render();
+});
+
+const v = id => $("#" + id).value.trim();
+function rans() {
+  return [...document.querySelectorAll(".ran")].map(r => ({
+    name: r.querySelector("input[type=text]").value.trim(),
+    chars: parseInt(r.querySelector("input[type=number]").value, 10) || 0
+  })).filter(r => r.name);
+}
+function block(title, body) { return body ? `■${title}\n${body}\n` : `■${title}\n（なし）\n`; }
+
+const STYLE = `【推薦書の書き方の決まり】
+・常体（だ・である調）。主語は「志願者は」。大学は「貴学」、学科は「貴学科」と書く。
+・材料にある事実だけで書く。推測・誇張・一般論で埋めない。
+・材料にない数字・時期・固有名詞・役職・結果は、決して作らず【①】【②】…の空欄にする。
+・感想や形容詞より、場面・行動・数字・固有名詞・その後の変化で書く（例：「約40名の部で」「2年次の8月から」「〇〇に約700名を対象としたアンケートを実施」）。
+・評定や資格は、材料の数値をそのまま使う。
+・アドミッション・ポリシーの言葉を1〜2か所、「 」で引いて、志願者の事実と結びつける。
+・「書いてほしくないこと」と、家庭の事情・健康など配慮が必要なことは書かない。
+・各欄は指定字数の9割以上、指定字数以内にする。`;
+
+const STRUCT = `【段落の組み立て（字数が多い欄）】
+「推薦の理由」にあたる欄
+ ① 総括：志願者の資質を二つに絞り、貴学科の求める人物に適していると述べる。
+ ② 問いの原点：将来の志につながる体験（いつ・どこで・何をし、何に気づいたか）。
+ ③ 学業：評定・資格、授業をきっかけに自分で広げた学び、理数を含む幅広い学び。
+ ④ 活動：部活動・委員会・ボランティアでの役職と、自分から始めた工夫・結果。
+ ⑤ 将来と大学：将来像と、貴学科で学びたいこと（ポリシーとの合致）。
+ ⑥ 結び：「以上のことから、〇〇と〇〇を土台に、〜人物であると確信し、推薦する。」
+「人物・性格の特徴」にあたる欄
+ ① 人柄の核：学級や友人関係での具体的なふるまい。
+ ② 総合的な探究：テーマ・調べ方・回数・成果。
+ ③ 卒業論文：題・問題意識・方法・資料・結論と、そこに表れた力。
+ ④ 継続力・視野：長く続けたこと、困難の乗り越え方、多様な人との関わり。
+ ⑤ 結び：「〇〇する力と〇〇を併せ持つ志願者は、貴学科においても〜と期待する。」
+【字数が少ない欄（400字未満）】
+ 総括1文（学科に直結する資質を一つ）→ 材料を三つ（専門の力・探究・部活動など）各1〜2文 → 結び1文。`;
+
+function materials() {
+  const rs = rans();
+  const ranText = rs.length ? rs.map((r, i) => `${i + 1}. ${r.name}（${r.chars ? "約" + r.chars + "字" : "字数は自由"}）`).join("\n") : "（未指定）";
+  return [
+    block("大学・学部・学科", [v("univ"), v("dept")].filter(Boolean).join("　")),
+    block("推薦書の欄と字数", ranText),
+    block("アドミッション・ポリシー（求める学生像）", v("ap")),
+    block("評定・資格など（調査書より）", v("grade")),
+    block("志望理由書", v("shibo")),
+    block("卒業論文・探究の要旨", v("ronbun")),
+    block("担任・顧問から見た様子", v("obs")),
+    block("書いてほしくないこと", v("ng")),
+    block("インタビューの書き起こし", v("talk"))
+  ].join("\n");
+}
+
+function build() {
+  const head = "あなたは高校で大学への推薦書を書く教員の補助をします。以下の材料をもとに、指示どおりに作業してください。\n\n";
+  const mat = "────────── 材料 ──────────\n" + materials() + "────────── 材料ここまで ──────────\n\n";
+  if (kind === "seiri") {
+    return head + `【作業】推薦書を書く前に、材料を整理してください。推薦書の本文はまだ書かないでください。
+
+1. 次のA〜Hごとに、材料からわかった事実を箇条書きにする。数字・時期・固有名詞はそのまま残す。
+ A 将来と問い／B きっかけの体験／C 問いを深めるためにしたこと／D 学業／E 部活動・委員会・ボランティア／F 総合的な探究・卒業論文／G 人柄・続けてきたこと／H 大学で学びたいこと
+2. 各項目で、推薦書にするには足りないもの（数字・時期・固有名詞・役職・結果・その後の変化）を挙げる。
+3. 「追加で聞くこと」を、生徒にそのまま聞ける短い質問にして、大事な順に10個以内で並べる。
+4. 表「アドミッション・ポリシーの言葉｜対応する事実｜具体（数字・固有名詞・時期）｜使う欄」を作る。
+5. 志願者の資質を二つに絞るなら何か、候補を二〜三組と、それぞれの根拠を示す。
+6. 材料の中で、食い違っている所や、本当か確かめたほうがよい所があれば挙げる。
+
+` + STYLE + "\n\n" + mat;
+  }
+  if (kind === "shitagaki") {
+    return head + `【作業】推薦書の下書きと、生徒に渡す確認シートを作ってください。
+
+` + STYLE + "\n\n" + STRUCT + `
+
+【出力の形】
+1. 欄ごとに「■欄の名前（〇〇字）」の見出しを付け、本文を書く。段落の頭は全角1字下げ。最後に本文の字数を（ ）で書く。空欄【①】などは、そのまま本文に残す。
+2. 「■確認シート」として、空欄の番号ごとに、生徒が何を書けばよいかを、やさしい言葉で1〜2行で説明する（例：「① 能登半島のボランティアに参加した日数。〇泊〇日、時期もわかれば」）。
+3. 「■先生が確かめること」として、材料だけでは確かでない記述や、言い過ぎになっていないか確かめたい所を挙げる。
+
+` + mat;
+  }
+  return head + `【作業】前に作った下書きに、確認シートへの生徒の答えを入れて、推薦書を仕上げてください。
+
+` + STYLE + `
+
+【仕上げのしかた】
+・空欄【①】などを、生徒の答えをもとに埋める。答えにないものは空欄のまま残し、最後に一覧にする。
+・生徒の答えで、下書きの記述が事実と違うとわかった所は、答えに合わせて書き直す（下書きの推測を残さない）。
+・埋めたことで字数を超えたら、総括・結びの言い回しや重なりを削って、指定字数に収める。具体的な事実（数字・固有名詞）は残す。
+・欄ごとに「■欄の名前（〇〇字）」の見出しと本文、最後に本文の字数を書く。
+・最後に「■直したところ」として、下書きから変えた点を短く箇条書きにする。
+
+────────── 前に作った下書き ──────────
+${v("prev") || "（なし）"}
+
+────────── 確認シートへの生徒の答え・追加で聞いたこと ──────────
+${v("ans") || "（なし）"}
+
+` + mat;
+}
+
+function render() {
+  const text = build();
+  $("#out").textContent = text;
+  $("#count").textContent = `指示文 ${text.length.toLocaleString()}字`;
+  const miss = [];
+  if (!v("talk") && kind !== "shiage") miss.push("インタビューの書き起こし");
+  if (!rans().length) miss.push("欄と字数");
+  if (kind === "shiage" && !v("prev")) miss.push("前に作った下書き");
+  if (kind === "shiage" && !v("ans")) miss.push("生徒の答え");
+  if (!v("ap")) miss.push("アドミッション・ポリシー（なくても作れますが、学科との結びつきが弱くなります）");
+  $("#warn").textContent = miss.length ? "まだ入っていないもの：" + miss.join("／") : "";
+  $("#toast").textContent = "";
+}
+document.addEventListener("input", render);
+
+$("#copy").onclick = async () => {
+  const text = build();
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const t = document.createElement("textarea");
+    t.value = text; document.body.appendChild(t); t.select();
+    document.execCommand("copy"); t.remove();
+  }
+  $("#toast").textContent = "コピーしました";
+};
+
+window.addEventListener("beforeunload", e => {
+  if (v("talk") || v("prev")) { e.preventDefault(); e.returnValue = ""; }
+});
+
+setPreset("two");
+</script>
+</body>
+</html>
